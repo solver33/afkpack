@@ -1,0 +1,13 @@
+## Interface: 120105, 120107
+## Title: AfkPack
+## Notes: Automatic loot rolls (pass / need / transmog-greed), auto-accept summons and resurrections. /afkpack
+## Notes-ruRU: Автоматические броски лута (отказ / need / transmog-greed), автопринятие суммона и воскрешения. /afkpack
+## Author: solver33
+## Version: 1.0.0
+## SavedVariablesPerCharacter: AfkPackDB
+## IconTexture: Interface\Icons\Spell_Nature_Sleep
+## AddonCompartmentFunc: AfkPack_OnAddonCompartmentClick
+
+Locales.lua
+Core.lua
+Options.lua
