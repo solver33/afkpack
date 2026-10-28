@@ -53,27 +53,44 @@ end
 
 --[[ Loot rolls ]]
 
+-- Pets and recipes never get an automatic Need, they fall back to the next best roll
+local function IsNeedExcluded(link)
+	if not link then
+		return false
+	end
+	-- Caged battle pets have their own hyperlink type
+	if link:find("|Hbattlepet:", 1, true) then
+		return true
+	end
+	local _, _, _, _, _, classID, subClassID = C_Item.GetItemInfoInstant(link)
+	return classID == Enum.ItemClass.Recipe
+		or classID == Enum.ItemClass.Battlepet
+		or (classID == Enum.ItemClass.Miscellaneous and subClassID == Enum.ItemMiscellaneousSubclass.CompanionPet)
+end
+
 local function ChooseRollType(rollID)
 	local _, name, _, _, _, canNeed, canGreed, _, _, _, _, _, canTransmog = GetLootRollItemInfo(rollID)
 	if not name then
 		return nil
 	end
+	-- Read the link now: rolling may end the roll and invalidate the id
+	local link = GetLootRollItemLink(rollID)
 
 	local mode = db.lootMode
 	if mode == "pass" then
-		return ROLL_PASS, name
+		return ROLL_PASS, link or name
 	end
-	if mode == "need" and canNeed then
-		return ROLL_NEED, name
+	if mode == "need" and canNeed and not IsNeedExcluded(link) then
+		return ROLL_NEED, link or name
 	end
 	-- Transmog wins over Greed, and the Blizzard frame hides Greed when Transmog is offered
 	if canTransmog then
-		return ROLL_TRANSMOG, name
+		return ROLL_TRANSMOG, link or name
 	end
 	if canGreed then
-		return ROLL_GREED, name
+		return ROLL_GREED, link or name
 	end
-	return ROLL_PASS, name
+	return ROLL_PASS, link or name
 end
 
 local function HandleRoll(rollID)
@@ -81,13 +98,11 @@ local function HandleRoll(rollID)
 		return
 	end
 
-	local rollType, name = ChooseRollType(rollID)
+	local rollType, link = ChooseRollType(rollID)
 	if not rollType then
 		return
 	end
 
-	-- Read the link first: rolling may end the roll and invalidate the id
-	local link = GetLootRollItemLink(rollID) or name
 	rolled[rollID] = rollType
 	RollOnLoot(rollID, rollType)
 	Print(L.ROLLED:format(ROLL_NAMES[rollType], link))

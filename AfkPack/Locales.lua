@@ -6,7 +6,7 @@ local L = {
 	LOOT_HEADER = "Loot rolls",
 	MODE_OFF = "Off (roll manually)",
 	MODE_PASS = "Pass on all loot",
-	MODE_NEED = "Need if possible, otherwise the best available option",
+	MODE_NEED = "Need if possible (not on pets and recipes), otherwise the best option",
 	MODE_GREED = "Transmog / Greed only, never Need",
 
 	ACCEPT_HEADER = "Auto-accept",
@@ -46,7 +46,7 @@ if GetLocale() == "ruRU" then
 	L.LOOT_HEADER = "Броски за лут"
 	L.MODE_OFF = "Выключено (бросаю сам)"
 	L.MODE_PASS = "Отказываться от всего лута"
-	L.MODE_NEED = "Need, если можно, иначе лучший доступный вариант"
+	L.MODE_NEED = "Need, если можно (кроме петов и рецептов), иначе лучший вариант"
 	L.MODE_GREED = "Только Transmog / Greed, без Need"
 
 	L.ACCEPT_HEADER = "Автопринятие"
