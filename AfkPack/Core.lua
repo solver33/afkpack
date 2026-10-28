@@ -53,8 +53,12 @@ end
 
 --[[ Loot rolls ]]
 
--- Pets and recipes never get an automatic Need, they fall back to the next best roll
-local function IsNeedExcluded(link)
+local function GetItemClass(link)
+	local _, _, _, _, _, classID, subClassID = C_Item.GetItemInfoInstant(link)
+	return classID, subClassID
+end
+
+local function IsPet(link)
 	if not link then
 		return false
 	end
@@ -62,10 +66,13 @@ local function IsNeedExcluded(link)
 	if link:find("|Hbattlepet:", 1, true) then
 		return true
 	end
-	local _, _, _, _, _, classID, subClassID = C_Item.GetItemInfoInstant(link)
-	return classID == Enum.ItemClass.Recipe
-		or classID == Enum.ItemClass.Battlepet
+	local classID, subClassID = GetItemClass(link)
+	return classID == Enum.ItemClass.Battlepet
 		or (classID == Enum.ItemClass.Miscellaneous and subClassID == Enum.ItemMiscellaneousSubclass.CompanionPet)
+end
+
+local function IsRecipe(link)
+	return link ~= nil and GetItemClass(link) == Enum.ItemClass.Recipe
 end
 
 local function ChooseRollType(rollID)
@@ -76,11 +83,20 @@ local function ChooseRollType(rollID)
 	-- Read the link now: rolling may end the roll and invalidate the id
 	local link = GetLootRollItemLink(rollID)
 
+	-- Pets are always passed, in every mode including "off"
+	if IsPet(link) then
+		return ROLL_PASS, link or name
+	end
+
 	local mode = db.lootMode
+	if mode == "off" then
+		return nil
+	end
 	if mode == "pass" then
 		return ROLL_PASS, link or name
 	end
-	if mode == "need" and canNeed and not IsNeedExcluded(link) then
+	-- Recipes never get an automatic Need, they fall back to the next best roll
+	if mode == "need" and canNeed and not IsRecipe(link) then
 		return ROLL_NEED, link or name
 	end
 	-- Transmog wins over Greed, and the Blizzard frame hides Greed when Transmog is offered
@@ -94,7 +110,7 @@ local function ChooseRollType(rollID)
 end
 
 local function HandleRoll(rollID)
-	if db.lootMode == "off" or rolled[rollID] then
+	if rolled[rollID] then
 		return
 	end
 
@@ -109,9 +125,6 @@ local function HandleRoll(rollID)
 end
 
 local function ProcessActiveRolls()
-	if db.lootMode == "off" then
-		return
-	end
 	for _, rollID in ipairs(GetActiveLootRollIDs()) do
 		HandleRoll(rollID)
 	end

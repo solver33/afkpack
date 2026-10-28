@@ -49,7 +49,11 @@ local function CreateOptionsFrame()
 		y = y - 22
 	end
 
-	y = y - 10
+	local petsNote = f:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
+	petsNote:SetPoint("TOPLEFT", 22, y)
+	petsNote:SetText(L.PETS_NOTE)
+	width = math.max(width, 22 + petsNote:GetStringWidth())
+	y = y - 26
 	f.checks = {}
 	AddHeader(L.ACCEPT_HEADER)
 	for _, option in ipairs({ { "autoSummon", L.AUTO_SUMMON }, { "autoResurrect", L.AUTO_RESURRECT } }) do
